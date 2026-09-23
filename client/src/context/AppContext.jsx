@@ -1,7 +1,7 @@
 import { createContext, useEffect, useState } from "react";
-import { jobsData } from "../assets/assets";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { useAuth, useUser } from "@clerk/clerk-react";
 
 export const AppContext = createContext()
 
@@ -9,6 +9,9 @@ export const AppContextProvider = (props) => {
 
     const backendUrl = import.meta.env.VITE_BACKEND_URL
 
+    const {user} = useUser()
+    const {getToken} = useAuth()
+ 
     const [searchFilter, setSearchFilter] = useState({
         title: '',
         location: ''
@@ -64,7 +67,22 @@ export const AppContextProvider = (props) => {
 
     // Function to fetch user Data
     const fetchUserData = async ()=>{
-        
+        try {
+            
+            const token = await getToken();
+
+            const { data } = await axios.get(backendUrl+'/api/users/user',
+                {headers:{Authorization:`Bearer ${token}`}})
+
+            if(data.success) {
+                setUserData(data.user)
+            }else{
+                toast.error(data.message)
+            }
+
+        } catch (error) {
+            toast.error(error.message)
+        }
     }
 
     useEffect(() => {
@@ -83,6 +101,12 @@ export const AppContextProvider = (props) => {
             fetchCompanyData()
         }
     }, [companyToken])
+
+    useEffect(()=>{
+        if(user) {
+            fetchUserData()
+        }
+    },[user])
 
     const value = {
         setSearchFilter, searchFilter,
