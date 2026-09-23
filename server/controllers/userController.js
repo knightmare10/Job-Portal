@@ -18,7 +18,7 @@ export const getUserData = async (req,res) =>{
         }
 
         res.json({success:true, user})
-        
+
     } catch (error) {
         res.json({success:false, message: error.message})
     }
@@ -89,7 +89,7 @@ export const updateUserResume = async (req,res) =>{
         
         const userId = req.auth.userId
 
-        const resumeFile = req.resumeFile
+        const resumeFile = req.file
 
         const userData = await User.findById(userId)
 
